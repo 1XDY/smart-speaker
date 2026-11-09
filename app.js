@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 添加
   document.getElementById('btn-add').addEventListener('click', () => openTaskSheet(null));
   document.getElementById('btn-close-sheet').addEventListener('click', () => closeSheet('task'));
-  document.getElementById('sheet-mask').addEventListener('click', () => closeSheet('task'));
+  document.getElementById('task-mask').addEventListener('click', () => closeSheet('task'));
   document.getElementById('btn-save').addEventListener('click', saveTask);
 
   // 试听
