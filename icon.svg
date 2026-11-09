@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- 喇叭 -->
+  <path d="M150 210 h56 l70 -62 a20 20 0 0 1 34 15 v270 a20 20 0 0 1 -34 15 l-70 -62 h-56 a20 20 0 0 1 -20 -20 v-136 a20 20 0 0 1 20 -20 z" fill="#fff"/>
+  <!-- 声波 -->
+  <path d="M330 180 a90 90 0 0 1 0 152" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round"/>
+  <path d="M382 140 a150 150 0 0 1 0 232" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" opacity=".7"/>
+  <!-- 小闹钟点 -->
+  <circle cx="205" cy="360" r="16" fill="#D97706"/>
+</svg>

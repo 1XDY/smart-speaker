@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F59E0B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="定时小喇叭">
+<title>定时小喇叭</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- 顶部栏 -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">📣</div>
+    <div>
+      <h1>定时小喇叭</h1>
+      <p class="subtitle">到点就响 · 想说就说</p>
+    </div>
+  </div>
+  <button class="icon-btn" id="btn-settings" aria-label="设置">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</header>
+
+<!-- 状态卡：下一个任务 -->
+<section class="next-card" id="next-card">
+  <div class="next-label">下一个提醒</div>
+  <div class="next-main">
+    <div class="next-time" id="next-time">--:--</div>
+    <div class="next-info">
+      <div class="next-name" id="next-name">还没有任务</div>
+      <div class="next-meta" id="next-meta">点右下角 + 添加一个吧</div>
+    </div>
+  </div>
+  <div class="next-wave"><span></span><span></span><span></span><span></span><span></span></div>
+</section>
+
+<!-- 输出设备条 -->
+<section class="device-bar" id="device-bar">
+  <div class="device-icon">🔊</div>
+  <div class="device-info">
+    <div class="device-name" id="device-name">手机扬声器</div>
+    <div class="device-status" id="device-status">默认输出设备</div>
+  </div>
+  <button class="chip-btn" id="btn-devices">连接外接</button>
+</section>
+
+<!-- 任务列表 -->
+<section class="list-section">
+  <div class="list-head">
+    <h2>我的任务</h2>
+    <span class="count" id="task-count">0 个</span>
+  </div>
+  <div id="task-list" class="task-list">
+    <!-- 任务卡片由 JS 渲染 -->
+    <div class="empty" id="empty-state">
+      <div class="empty-emoji">🕰️</div>
+      <p>还没有定时任务</p>
+      <span>点击右下角按钮，新建你的第一个小喇叭</span>
+    </div>
+  </div>
+</section>
+
+<!-- 悬浮添加按钮 -->
+<button class="fab" id="btn-add" aria-label="添加任务">
+  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- 底部提示条 -->
+<div class="toast" id="toast"></div>
+
+<!-- 添加/编辑任务 弹层 -->
+<div class="sheet-mask" id="sheet-mask"></div>
+<div class="sheet" id="task-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h3 id="sheet-title">新建任务</h3>
+    <button class="icon-btn" id="btn-close-sheet">✕</button>
+  </div>
+  <div class="sheet-body">
+    <label class="field">
+      <span class="field-label">任务名称</span>
+      <input type="text" id="f-name" placeholder="例如：吃药 / 起身喝水 / 开会提醒" maxlength="20">
+    </label>
+
+    <label class="field">
+      <span class="field-label">触发时间</span>
+      <input type="time" id="f-time" value="08:00">
+    </label>
+
+    <div class="field">
+      <span class="field-label">重复</span>
+      <div class="days-row" id="f-days">
+        <button data-d="1" class="day">一</button>
+        <button data-d="2" class="day">二</button>
+        <button data-d="3" class="day">三</button>
+        <button data-d="4" class="day">四</button>
+        <button data-d="5" class="day">五</button>
+        <button data-d="6" class="day">六</button>
+        <button data-d="0" class="day">日</button>
+      </div>
+      <div class="quick-repeat">
+        <button data-repeat="daily">每天</button>
+        <button data-repeat="weekday">工作日</button>
+        <button data-repeat="once">仅一次</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">到点做什么</span>
+      <div class="action-tabs" id="f-action">
+        <button data-a="sound" class="active">🔔 播放提示音</button>
+        <button data-a="voice">🗣️ 语音播报</button>
+        <button data-a="both">✨ 提示音+语音</button>
+      </div>
+    </div>
+
+    <div class="field" id="field-sound">
+      <span class="field-label">提示音（卡通音色，点一下可试听）</span>
+      <div class="sound-row" id="f-sound">
+        <button data-s="stitch" class="sound active">👽 史迪奇·调皮</button>
+        <button data-s="doraemon" class="sound">🔔 哆啦A梦·元气</button>
+        <button data-s="pooh" class="sound">🍯 小熊维尼·温暖</button>
+        <button data-s="pikachu" class="sound">⚡ 皮卡丘·电气</button>
+        <button data-s="lazy" class="sound">😴 懒洋洋·软萌</button>
+        <button data-s="totoro" class="sound">🌿 龙猫·森林</button>
+        <button data-s="kitty" class="sound">🎀 凯蒂猫·甜心</button>
+        <button data-s="minion" class="sound">🍌 小黄人·搞笑</button>
+      </div>
+      <div class="sound-row" id="f-sound-basic" style="margin-top:10px">
+        <button data-s="bell" class="sound">🔔 铃声</button>
+        <button data-s="chime" class="sound">🎵 木琴</button>
+        <button data-s="beep" class="sound">📟 蜂鸣</button>
+        <button data-s="magic" class="sound">🪄 魔法</button>
+      </div>
+    </div>
+
+    <label class="field" id="field-voice">
+      <span class="field-label">语音内容</span>
+      <textarea id="f-voice" rows="2" placeholder="到点会朗读这段话，例如：该吃药啦！"></textarea>
+    </label>
+
+    <label class="field">
+      <span class="field-label">玩偶语音文件（选填）</span>
+      <input type="text" id="f-toyfile" placeholder="如 take_medicine.mp3，存于 TF 卡，让玩偶播真人录音" maxlength="40">
+    </label>
+
+    <div class="field">
+      <span class="field-label">音量</span>
+      <div class="volume-row">
+        <span>🔈</span>
+        <input type="range" id="f-volume" min="0" max="100" value="90">
+        <span>🔊</span>
+        <span class="vol-val" id="vol-val">90</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">音色微调（拖动即时试听）</span>
+      <div class="volume-row">
+        <span>🐢</span>
+        <input type="range" id="f-speed" min="0.5" max="1.8" step="0.02" value="1">
+        <span>🐇</span>
+        <span class="vol-val" id="speed-val">1.00</span>
+      </div>
+      <div class="volume-row" style="margin-top:10px">
+        <span>🔻</span>
+        <input type="range" id="f-pitch" min="0.6" max="1.6" step="0.02" value="1">
+        <span>🔺</span>
+        <span class="vol-val" id="pitch-val">1.00</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">语音语速（角色嗓音）</span>
+      <div class="volume-row">
+        <span>🐢</span>
+        <input type="range" id="f-voicerate" min="0.5" max="1.6" step="0.02" value="1">
+        <span>🐇</span>
+        <span class="vol-val" id="vr-val">1.00</span>
+      </div>
+    </div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn-ghost" id="btn-test">▶ 试听</button>
+    <button class="btn-primary" id="btn-save">保存任务</button>
+  </div>
+</div>
+
+<!-- 设置 弹层 -->
+<div class="sheet-mask" id="settings-mask"></div>
+<div class="sheet" id="settings-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h3>设置</h3>
+    <button class="icon-btn" id="btn-close-settings">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="setting-row">
+      <div>
+        <div class="setting-title">开机自启提醒</div>
+        <div class="setting-desc">App 在后台也能按时响铃</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="s-autostart" checked><span></span></label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-title">到点震动</div>
+        <div class="setting-desc">提醒时伴随手机震动</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="s-vibrate" checked><span></span></label>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-title">免打扰时段</div>
+        <div class="setting-desc">该时段内不响铃</div>
+      </div>
+      <div class="dnd-time">
+        <input type="time" id="s-dnd-from" value="22:00">
+        <span>→</span>
+        <input type="time" id="s-dnd-to" value="07:00">
+      </div>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-title">语音音色</div>
+        <div class="setting-desc">语音播报使用的嗓音</div>
+      </div>
+      <select id="s-voice" class="voice-select"><option>默认女声</option></select>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-title">蓝牙喇叭（玩偶音箱）</div>
+        <div class="setting-desc">手机蓝牙直连玩偶，同步日程与真人语音，无需 WiFi</div>
+      </div>
+    </div>
+    <button class="btn-primary full" id="btn-ble-connect">连接蓝牙玩偶</button>
+    <button class="btn-ghost full" id="btn-ble-sync">同步日程到玩偶</button>
+    <div class="net-status" id="net-status">未连接</div>
+    <button class="btn-ghost full" id="btn-reset">清空所有任务</button>
+    <p class="version">定时小喇叭 v1.0 · 本地运行，数据只存在你的手机里</p>
+  </div>
+</div>
+
+<!-- 外接设备 弹层 -->
+<div class="sheet-mask" id="device-mask"></div>
+<div class="sheet" id="device-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h3>外接设备</h3>
+    <button class="icon-btn" id="btn-close-device">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="device-card">
+      <div class="dc-icon">🔊</div>
+      <div class="dc-info">
+        <div class="dc-title">蓝牙小喇叭</div>
+        <div class="dc-desc">手机连上蓝牙音箱后，声音自动从音箱外放。这是最简单的方式。</div>
+      </div>
+    </div>
+    <div class="device-card">
+      <div class="dc-icon">📡</div>
+      <div class="dc-info">
+        <div class="dc-title">WiFi 智能音箱 / 物联网喇叭</div>
+        <div class="dc-desc">App 通过网络给独立的小喇叭发指令，让它在指定时间外放声音。</div>
+      </div>
+    </div>
+    <div class="device-card">
+      <div class="dc-icon">📶</div>
+      <div class="dc-info">
+        <div class="dc-title">低功耗蓝牙（BLE）设备</div>
+        <div class="dc-desc">连接自定义的蓝牙模块，近距离控制外设。</div>
+      </div>
+    </div>
+
+    <button class="btn-primary full" id="btn-scan">扫描附近设备</button>
+    <div class="device-list" id="ble-list"></div>
+    <p class="version">提示：普通蓝牙音箱请在手机“设置 → 蓝牙”里配对，App 会自动用它外放。</p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
